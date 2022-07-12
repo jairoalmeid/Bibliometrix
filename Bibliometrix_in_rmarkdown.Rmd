@@ -48,3 +48,13 @@ options(width=100)
 S <- summary(object = results, k = 5, pause = FALSE)
 
 ```
+** Plotagem gráfica **
+
+Após criar o objeto Bibliometrix, é possível fazer a plotagem gráfica dos resultados. A variável "k" determina a quantidade de elementos que serão plotados
+
+```{r}
+plot(x = results, k = 15, pause = FALSE)
+
+```
+
+
