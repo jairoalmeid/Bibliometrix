@@ -2,7 +2,7 @@
 title: "Bibliometrix - RSL Eventos Climáticos Extremos"
 output: html_notebook
 ---
-** Preparando ambiente **
+- **Preparando ambiente**
 Para essa análise será utilizada a biblioteca Bibliometrix e suas dependências, para instalar utilize o comando
 
 ```{r}
@@ -10,7 +10,7 @@ install.packages("bibliometrix", dependencies=TRUE)
 ```
 
 
-** Preparando a amostra **
+- **Preparando a amostra**
 
 - A exportação de conteúdo na Web Of Science é limitado a 500 registros, nesse estudo a amostra resultou em 572 documentos (12/jul/2022). Para que seja considerada a amostra toda, é necessário unir os arquivos
 
@@ -32,7 +32,7 @@ Amostra <- convert2df(file, dbsource = "wos", format = "bibtex")
 "plaintext" para arquivos em formato .txt
 "endnote" para arquivos em formato .ciw
 
-** Análise da importação **
+- ** Análise da importação **
 
 Criação do objeto bibliometrix
 O objeto contem informações como número de documentos, distribuição e frequência por autores, Ano de publicação etc. Essas informações serão utilizadas para realizar a análise estatística da amostra.
@@ -48,7 +48,7 @@ options(width=100)
 S <- summary(object = results, k = 5, pause = FALSE)
 
 ```
-** Plotagem gráfica **
+- ** Plotagem gráfica **
 
 Após criar o objeto Bibliometrix, é possível fazer a plotagem gráfica dos resultados. A variável "k" determina a quantidade de elementos que serão plotados
 
@@ -58,7 +58,7 @@ plot(x = results, k = 15, pause = FALSE)
 ```
 
 
-** Análise de referências e citações **
+- ** Análise de referências e citações **
 A função citations gera uma tabela de frequências com os primeiros-autores mais citados
 
 ```{r}
@@ -71,7 +71,7 @@ CR$Authors[1:10,]
 CR <- localCitations(Amostra, sep = ";")
 CR$Papers[1:10,]
 ```
-** Índice de dominância **
+- ** Índice de dominância **
 
 Criado por Kumar, S., & Kumar, S. (2008) calcula o ranking de dominância dos autores
 
@@ -80,7 +80,7 @@ DF <- dominance(results, k = 10)
 DF
 ``` 
 
-** Autor h-index **
+- ** Autor h-index **
 
 É um índice capaz de mensurar a produtividade e o impacto de publicações de autores ou escolas. Esse índice é calculado com base na quantidade de citações que os autores receberam em outras publicações da amostra. 
 
@@ -99,7 +99,7 @@ topAU <- authorProdOverTime(Amostra, k = 15, graph = TRUE)
 head(topAU$dfAU)
 ```
 
-** Coeficiente de Lotka **
+- ** Coeficiente de Lotka **
 
 A lei de Lotka descreve a frequência de publicação por autor. Segundo essa lei o número de autores que publicam um determinado número de artigos é uma proporção fixa para o número de autores que publicam um único artigo.
 
@@ -124,5 +124,50 @@ Theoretical=10^(log10(L$C)-2*log10(L$AuthorProd[,1]))
 plot(L$AuthorProd[,1],Theoretical,type="l",col="red",ylim=c(0, 1), xlab="Artigos",ylab="Freq. por autores",main="Produção Científica")
 lines(L$AuthorProd[,1],Observed,col="blue")
 legend(x="topright",c("Lei te Lotka (B=2)","Observado"),col=c("red","blue"),lty = c(1,1,1),cex=0.6,bty="n")
+```
+
+**Conexão entre artigos**
+Os artigos podem apresentar conexões entre si, essa análise é feita através da relação entre autores, keywords
+
+```{r}
+# Relação de artigos por revistas
+A <- cocMatrix(Amostra, Field = "SO", sep = ";")
+sort(Matrix::colSums(A), decreasing = TRUE)[1:10]
+```
+
+```{r}
+# Author network
+A <- cocMatrix(Amostra, Field = "AU", sep = ";")
+sort(Matrix::colSums(A), decreasing = TRUE)[1:10]
+```
+
+**Colaboração Científica Internacional**
+Analisa a conexão entre os países para colaboração científica das produções
+```{r}
+M <- metaTagExtraction(Amostra, Field = "AU_CO", sep = ";")
+NetMatrix <- biblioNetwork(M, analysis = "collaboration", network = "countries", sep = ";")
+
+net=networkPlot(NetMatrix, n = dim(NetMatrix)[1], Title = "Colaboração", type = "circle", size=TRUE, remove.multiple=FALSE,labelsize=0.5,cluster="none")
+```
+
+```{r}
+# Criação de rede de co-citação
+
+NetMatrix <- biblioNetwork(Amostra, analysis = "co-citation", network = "references", sep = ";")
+
+net=networkPlot(NetMatrix, n = 20, Title = "Co-Citation Network", type = "fruchterman", size=T, remove.multiple=FALSE, labelsize=0.5,edgesize = 5)
+```
+
+```{r}
+# Rede de co-ocorrência entre paralavras-chave 
+
+NetMatrix <- biblioNetwork(Amostra, analysis = "co-occurrences", network = "keywords", sep = ";")
+
+# Plot the network
+net=networkPlot(NetMatrix, normalize="association", weighted=T, n = 30, Title = "Keyword Co-occurrences", type = "fruchterman", size=T,edgesize = 5,labelsize=0.7)
+```
+
+```{r}
+CS <- conceptualStructure(Amostra,field="ID", method="CA", minDegree=4, clust=5, stemming=FALSE, labelsize=10, documents=10)
 ```
 
