@@ -1,0 +1,50 @@
+---
+title: "Bibliometrix - RSL Eventos Climáticos Extremos"
+output: html_notebook
+---
+** Preparando ambiente **
+Para essa análise será utilizada a biblioteca Bibliometrix e suas dependências, para instalar utilize o comando
+
+```{r}
+install.packages("bibliometrix", dependencies=TRUE)
+```
+
+
+** Preparando a amostra **
+
+- A exportação de conteúdo na Web Of Science é limitado a 500 registros, nesse estudo a amostra resultou em 572 documentos (12/jul/2022). Para que seja considerada a amostra toda, é necessário unir os arquivos
+
+```{r}
+library(bibliometrix)
+
+file <- c("https://raw.githubusercontent.com/jairoalmeid/Bibliometrix/main/WebOfScience_export_part1.bib", "https://raw.githubusercontent.com/jairoalmeid/Bibliometrix/main/WebOfScience_export_part2.bib")
+
+Amostra <- convert2df(file, dbsource = "wos", format = "bibtex")
+```
+
+- dbsource 
+"isi" ou "wos" para arquivos vindo do Web Of Science;
+"scopus" para arquivos da base de dados Scopus;
+"pubmed" para arquivos da base PubMed;
+
+- formart 
+"bibtex" para arquivos em formato .bib
+"plaintext" para arquivos em formato .txt
+"endnote" para arquivos em formato .ciw
+
+** Análise da importação **
+
+Criação do objeto bibliometrix
+O objeto contem informações como número de documentos, distribuição e frequência por autores, Ano de publicação etc. Essas informações serão utilizadas para realizar a análise estatística da amostra.
+```{r}
+results <- biblioAnalysis(Amostra, sep = ";")
+
+```
+
+A descrição estatística pode ser feita através da impressão do sumário, que contém um resumo com algumas informações. Nesse caso a variável "k" delimita a quantidade de informações.
+
+```{r}
+options(width=100)
+S <- summary(object = results, k = 5, pause = FALSE)
+
+```
