@@ -58,3 +58,71 @@ plot(x = results, k = 15, pause = FALSE)
 ```
 
 
+** Análise de referências e citações **
+A função citations gera uma tabela de frequências com os primeiros-autores mais citados
+
+```{r}
+# Análise de autores mais citados
+CR <- localCitations(Amostra, sep = ";")
+CR$Authors[1:10,]
+```
+```{r}
+# Análise dos papers mais citados
+CR <- localCitations(Amostra, sep = ";")
+CR$Papers[1:10,]
+```
+** Índice de dominância **
+
+Criado por Kumar, S., & Kumar, S. (2008) calcula o ranking de dominância dos autores
+
+``` {r}
+DF <- dominance(results, k = 10)
+DF
+``` 
+
+** Autor h-index **
+
+É um índice capaz de mensurar a produtividade e o impacto de publicações de autores ou escolas. Esse índice é calculado com base na quantidade de citações que os autores receberam em outras publicações da amostra. 
+
+``` {r}
+
+# Calcula o h-index dos 10 autores
+authors=gsub(","," ",names(results$Authors)[1:10])
+
+indices <- Hindex(Amostra, field = "author", elements=authors, sep = ";", years = 50)
+
+indices$H
+``` 
+``` {r}
+# Lista o autor com maior produtividade ao longo do tempo
+topAU <- authorProdOverTime(Amostra, k = 15, graph = TRUE)
+head(topAU$dfAU)
+```
+
+** Coeficiente de Lotka **
+
+A lei de Lotka descreve a frequência de publicação por autor. Segundo essa lei o número de autores que publicam um determinado número de artigos é uma proporção fixa para o número de autores que publicam um único artigo.
+
+```{r}
+L <- lotka(results)
+L$AuthorProd
+```
+
+
+```{r}
+# Coeficiente estimado
+L$Beta
+
+```
+
+```{r}
+# Plot com índice esperado e observado, seguindo a lei de Lotka
+
+Observed=L$AuthorProd[,3]
+Theoretical=10^(log10(L$C)-2*log10(L$AuthorProd[,1]))
+
+plot(L$AuthorProd[,1],Theoretical,type="l",col="red",ylim=c(0, 1), xlab="Artigos",ylab="Freq. por autores",main="Produção Científica")
+lines(L$AuthorProd[,1],Observed,col="blue")
+legend(x="topright",c("Lei te Lotka (B=2)","Observado"),col=c("red","blue"),lty = c(1,1,1),cex=0.6,bty="n")
+```
+
