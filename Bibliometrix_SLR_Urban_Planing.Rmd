@@ -1,6 +1,9 @@
 ---
-title: "Bibliometrics on calamity, disasters and catastrophes in the context of urban planning"
-output: html_notebook
+title: Bibliometrics on calamity, disasters and catastrophes in the context of urban
+  planning
+output:
+  html_document:
+    df_print: paged
 ---
 
 ## Material collection
