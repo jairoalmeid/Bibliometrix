@@ -1,0 +1,405 @@
+---
+title: Bibliometrics on calamity, disasters and catastrophes in the context of urban
+  planning
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+---
+
+## Material collection
+To create this report, materials were collected from the Scopus database on July 19, 2022, using the search expression TITLE-ABS-KEY(("urban planning") AND ("disaster" OR "catastrophe" OR "calamity") ).
+
+_**Results:**  documents, 992 in english language_
+
+_Databases used are available at [GitHub](https://github.com/jairoalmeid/Bibliometrix)_
+
+_This report illustrates in practice the use of the bibliometrix library documented in: [Bibliometrix Documentation](https://cran.r-project.org/web/packages/bibliometrix/bibliometrix.pdf)_
+
+## Environment preparation, installation and data upload
+
+```{r}
+# To install the packages and dependencies, remove the comment 
+# install.packages("bibliometrix", dependencies=TRUE)
+install.packages("reshape2")
+
+library(bibliometrix)
+library(reshape2)
+library(ggplot2)
+
+file <- c("https://raw.githubusercontent.com/jairoalmeid/Bibliometrix/main/WebOfScience_export_part1.bib", "https://raw.githubusercontent.com/jairoalmeid/Bibliometrix/main/WebOfScience_export_part2.bib")
+
+database <- convert2df(file, dbsource = "wos", format = "bibtex")
+```
+
+## Data analysis
+### Top-Autors' productivity over Time
+"It calculates and plots the author production (in terms of number of publication) over the time."[1]
+
+The 30 most published authors:
+
+```{r}
+authorProdOverTime(database, k = 20, graph = TRUE)
+```
+
+### Bibliometric Analysis and Summary
+"It performs a bibliometric analysis of a dataset imported from SCOPUS and Clarivate Analytics Web of Science databases. _biblioAnalysis_ returns an object of class 'bibliometrix'" [1]
+
+```{r}
+database_obj <- biblioAnalysis(database, sep = ";")
+summary(database_obj)
+```
+
+### Creating Bibliographic networks
+" _biblioNetwork_ creates different bibliographic networks from a bibliographic data frame." [1]
+
+### Authors collaboration 
+```{r}
+  Network_authorsCollaboration <- biblioNetwork(
+    database,
+    analysis = "collaboration",
+    network = "authors",
+    sep = ";"
+  )
+
+
+#plot of the top 20 collaboration networks (by number of publications)
+  net <- networkPlot(
+    Network_authorsCollaboration,
+    n=20,
+    type = "sphere",
+    Title = "Authors collaboration",
+    labelsize=0.6
+  )
+```
+### University collaboration
+```{r}
+Network_universityCollaboration <- biblioNetwork(
+  database,
+  analysis = "collaboration",
+  network = "universities",
+  sep = ";"
+)
+
+#plot of the top 20 collaboration networks (by number of publications)
+  net <- networkPlot(
+    Network_universityCollaboration,
+    n=20,
+    type = "star",
+    Title = "Univesities collaboration",
+    labelsize=0.6
+  )
+
+```
+### Country collaboration
+```{r}
+countries <- metaTagExtraction(database, Field = "AU_CO", sep = ";")
+
+Network_countryCollaboration <- biblioNetwork(
+  countries,
+  analysis = "collaboration",
+  network = "countries",
+  sep = ";"
+)
+
+
+#plot of the top 20 collaboration networks (by number of publications)
+  net <- networkPlot(
+    Network_countryCollaboration,
+    n=20,
+    type = "sphere",
+    Title = "Countries collaboration",
+    labelsize=0.6
+  )
+```
+
+### Authors co-citation
+```{r}
+authors_cocitation <- metaTagExtraction(database, Field = "CR_AU", sep = ";")
+
+Network_authorsCocitation <- biblioNetwork(
+  authors_cocitation,
+  analysis = "co-citation",
+  network = "authors",
+  sep = ";"
+)
+
+net <- networkPlot(
+  Network_authorsCocitation,
+  n = 20,
+  type = "star",
+  Title = "Auttors co-citation Networks",
+  labelsize = 0.5,
+  remove.multiple=FALSE
+)
+```
+
+### Reference co-citation
+```{r}
+ref_cr_au <- metaTagExtraction(
+  database,
+  Field = "CR_AU",
+  sep = ";"
+  )
+  
+reference_co_citation <- biblioNetwork(
+  ref_cr_au,
+  analysis = "co-citation",
+  network = "authors",
+  sep = ";"
+)
+
+net <- networkPlot(
+  reference_co_citation,
+  n = 20,
+  type = "auto",
+  Title = "Authors co-citation Network",
+  labelsize=0.5
+)
+```
+
+## Badford's law
+"It estimates and draws the Bradford's law source distribution. Bradford's law is a patterns first described by (Samuel C. Bradford, 1934) that estimates the exponentially diminishing returns of searching for reference jornals. One formulation is that if journals in a field are sorted by number of articles into three groups, each with about one-third of all articles, then the number of journals in each group will be proportional to 1:n:n2." [1]
+
+```{r}
+BL <- bradford(database)
+
+BL
+```
+
+## Citation frequency distribution
+It calculates frequency distribution of citations. 
+
+- Cited articles
+```{r}
+CFR <- citations(
+  database, 
+  field = "article", 
+  sep = ";"
+)
+
+CFR$Cited[1:10]
+
+```
+- Cited first authors
+```{r}
+CFA <- citations(
+  database,
+  field = "authors",
+  sep = ";"
+)
+
+CFA$Cited[1:10]
+```
+
+## Co-occurrence matrix
+"cocMatrix computes co-occurences between elements of a Tag Field from a bibliographic data frame. Manuscript is the unit of analysis" [1]
+
+```{r}
+#cocMatrix(
+#  database,
+#  Field = "AU",
+#  type = "sparse",
+#  n = 15,
+#  sep = ";"
+#)
+```
+
+## Creating and plotting conceptual structure map of a scientific field
+The function conceptualStructure creates a conceptual structure map of a scientific field performing Correspondence Analysis (CA), Multiple Correspondence Analysis (MCA) or Metric Multidimensional Scaling (MDS) and Clustering of a bipartite network of terms extracted from keyword, title or abstract fields.
+
+```{r}
+CS <- conceptualStructure(
+  database,
+  field = "ID",
+  method = "MCA",
+  stemming = FALSE,
+  minDegree = 3,
+  k.max = 5
+)
+```
+
+## Coupling Analysis
+"It performs a coupling network analysis and plots community detection results on a bi-dimensional
+map (Coupling Map)"[1]
+
+```{r}
+mapa <- couplingMap(
+  database,
+  analysis = "authors",
+  field = "CR",
+  n = 250,
+  impact.measure = "local",
+  minfreq = 3,
+  size = 0.5,
+  repel = TRUE
+)
+
+plot(mapa$map)
+```
+
+## Authors' dominance ranking
+"It calculates the authors’ dominance ranking from an object of the class ’bibliometrix’ as proposed by Kumar & Kumar, 2008"[1]
+
+```{r}
+DR <- dominance(
+  database_obj,
+  k = 15
+)
+
+DR
+```
+## Searching of duplicated records in a bibliographic database
+"Used to find duplicated between two or more databases"[1]
+```{r}
+newM <- duplicatedMatching(
+  database,
+  Field = "TI",
+  exact = FALSE,
+  tol = 0.95
+)
+
+dim(newM)
+```
+## Field Tag distribution by Year
+"It calculates the median year for each item of a field tag."[1]
+
+```{r}
+timespan=c(1999,2021)
+res <- fieldByYear(
+  database,
+  field = "ID",
+  timespan = timespan,
+  min.freq = 5,
+  n.items = 5,
+  graph = TRUE
+)
+```
+
+## Author local citation
+"It calculates local citations (LCS) of authors and documents of a bibliographic collection. Local citations meansure how many times an author (or a document) included in this collection have been cited by the documents also included in the collection"[1]
+
+```{r}
+CR <- localCitations(database, sep = ";")
+
+CR$Authors[1:10,]
+CR$Papers[1:10,]
+```
+## Lotka's law coefficient estimation
+It estimates Lotka's law coefficients for scientific productivity (Lotka A.J., 1926)
+
+```{r}
+lotka(database_obj)
+```
+
+## Plotting bibliographic networks
+The function networkPlot can plot a bibliographic network previously created by biblioNetwork.
+
+```{r}
+NetMatrix <- biblioNetwork(
+  database,
+  analysis = "co-occurrences",
+  network = "keywords",
+  sep = ";"
+)
+
+net <- networkPlot(
+  NetMatrix,
+  n = 30,
+  type = "auto",
+  Title = "Co-occurrence Network",
+  labelsize = 1
+)
+```
+
+## Calculate similarity indices
+"It calculates a relative measure of bibliographic co-occurrences." [1]
+
+```{r}
+NetMatrix <- biblioNetwork(
+  database,
+  analysis = "co-occurrences",
+  network = "keywords",
+  sep = ";"
+)
+
+S = normalizeSimilarity(
+  NetMatrix,
+  type = "association"
+)
+
+# Como plotar?
+
+# plot(S, k = 10, pause = FALSE)
+```
+
+## Plotting bibliometric analysis results
+```{r}
+years=c(2018,2019,2020,2021)
+
+nexus <- thematicEvolution(
+  database,  field = "ID",
+  years = years,
+  n = 100,
+  minFreq = 2
+)
+
+plotThematicEvolution(nexus$Nodes, nexus$Edges)
+```
+
+## Reference publication Year Spectroscopy
+"rpys computes a Reference Publication Year Spectroscopy for detecting the Historical Roots of Research Fields. The method was introduced by Marx et al., 2014." [1]
+
+```{r}
+res <- rpys(
+  database,
+  sep = ";",
+  graph = TRUE
+)
+```
+
+
+### Number of documents published annually per Top Sources
+"It calculates yearly published documents of the top sources." [1]
+
+```{r}
+
+topSO <- sourceGrowth(
+  database,
+  top = 5,
+  cdf = TRUE
+)
+
+DF <- melt(topSO, id="Year")
+ggplot(DF, aes(Year, value, group = variable, color = variable))+geom_line()
+```
+
+### Create a thematic map
+"thematicMap starts from a co-occurrence keyword network to plot in a two-dimesional map the typological themes of a domain."[1]
+
+```{r}
+
+res <- thematicMap(
+  database, 
+  field = "ID", 
+  n = 250, 
+  minfreq = 5, 
+  size = 0.5, 
+  repel = TRUE
+)
+
+plot(res$map)
+```
+
+
+```{r}
+threeFieldsPlot(
+  database, 
+  fields=c("AU","DE","SO"),
+  n=c(10,10,10)
+)
+```
+
+
+### References
+[1] Aria, M., Cuccurullo, C., Package ‘bibliometrix’. Available on https://cran.r-project.org/web/packages/bibliometrix/bibliometrix.pdf 
