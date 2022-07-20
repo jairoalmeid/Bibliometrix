@@ -21,7 +21,7 @@ _This report illustrates in practice the use of the bibliometrix library documen
 ```{r}
 # To install the packages and dependencies, remove the comment 
 # install.packages("bibliometrix", dependencies=TRUE)
-install.packages("reshape2")
+# install.packages("reshape2")
 
 library(bibliometrix)
 library(reshape2)
@@ -223,24 +223,7 @@ CS <- conceptualStructure(
 )
 ```
 
-## Coupling Analysis
-"It performs a coupling network analysis and plots community detection results on a bi-dimensional
-map (Coupling Map)"[1]
 
-```{r}
-mapa <- couplingMap(
-  database,
-  analysis = "authors",
-  field = "AU",
-  n = 250,
-  impact.measure = "local",
-  minfreq = 3,
-  size = 0.5,
-  repel = TRUE
-)
-
-plot(mapa$map)
-```
 
 ## Authors' dominance ranking
 "It calculates the authors’ dominance ranking from an object of the class ’bibliometrix’ as proposed by Kumar & Kumar, 2008"[1]
@@ -274,21 +257,12 @@ res <- fieldByYear(
   database,
   field = "ID",
   timespan = timespan,
-  min.freq = 5,
-  n.items = 5,
+  min.freq = 15,
+  n.items = 2,
   graph = TRUE
 )
 ```
 
-## Author local citation
-"It calculates local citations (LCS) of authors and documents of a bibliographic collection. Local citations meansure how many times an author (or a document) included in this collection have been cited by the documents also included in the collection"[1]
-
-```{r}
-CR <- localCitations(database, sep = ";")
-
-CR$Authors[1:10,]
-CR$Papers[1:10,]
-```
 ## Lotka's law coefficient estimation
 It estimates Lotka's law coefficients for scientific productivity (Lotka A.J., 1926)
 
@@ -334,7 +308,7 @@ S = normalizeSimilarity(
 
 # Como plotar?
 
-# plot(S, k = 10, pause = FALSE)
+#plot(S, k = 10, pause = FALSE)
 ```
 
 ## Plotting bibliometric analysis results
