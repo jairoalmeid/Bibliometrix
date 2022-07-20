@@ -8,32 +8,35 @@ output:
 ---
 
 ## Material collection
+
 To create this report, materials were collected from the Scopus database on July 19, 2022, using the search expression TITLE-ABS-KEY(("urban planning") AND ("disaster" OR "catastrophe" OR "calamity") ).
 
-_**Results:**  documents, 992 in english language_
+***Results:** documents, 992 in english language*
 
-_Databases used are available at [GitHub](https://github.com/jairoalmeid/Bibliometrix)_
+*Databases used are available at [GitHub](https://github.com/jairoalmeid/Bibliometrix)*
 
-_This report illustrates in practice the use of the bibliometrix library documented in: [Bibliometrix Documentation](https://cran.r-project.org/web/packages/bibliometrix/bibliometrix.pdf)_
+*This report illustrates in practice the use of the bibliometrix library documented in: [Bibliometrix Documentation](https://cran.r-project.org/web/packages/bibliometrix/bibliometrix.pdf)*
 
 ## Environment preparation, installation and data upload
 
 ```{r}
 # To install the packages and dependencies, remove the comment 
 # install.packages("bibliometrix", dependencies=TRUE)
-install.packages("reshape2")
+# install.packages("reshape2")
 
 library(bibliometrix)
 library(reshape2)
 library(ggplot2)
 
-file <- c("https://raw.githubusercontent.com/jairoalmeid/Bibliometrix/main/WebOfScience_export_part1.bib", "https://raw.githubusercontent.com/jairoalmeid/Bibliometrix/main/WebOfScience_export_part2.bib")
+file <- c("https://raw.githubusercontent.com/jairoalmeid/Bibliometrix/main/scopus.csv")
 
-database <- convert2df(file, dbsource = "wos", format = "bibtex")
+database <- convert2df(file, dbsource = "scopus", format = "csv")
 ```
 
 ## Data analysis
+
 ### Top-Autors' productivity over Time
+
 "It calculates and plots the author production (in terms of number of publication) over the time."[1]
 
 The 30 most published authors:
@@ -43,7 +46,8 @@ authorProdOverTime(database, k = 20, graph = TRUE)
 ```
 
 ### Bibliometric Analysis and Summary
-"It performs a bibliometric analysis of a dataset imported from SCOPUS and Clarivate Analytics Web of Science databases. _biblioAnalysis_ returns an object of class 'bibliometrix'" [1]
+
+"It performs a bibliometric analysis of a dataset imported from SCOPUS and Clarivate Analytics Web of Science databases. *biblioAnalysis* returns an object of class 'bibliometrix'" [1]
 
 ```{r}
 database_obj <- biblioAnalysis(database, sep = ";")
@@ -51,9 +55,11 @@ summary(database_obj)
 ```
 
 ### Creating Bibliographic networks
-" _biblioNetwork_ creates different bibliographic networks from a bibliographic data frame." [1]
 
-### Authors collaboration 
+" *biblioNetwork* creates different bibliographic networks from a bibliographic data frame." [1]
+
+### Authors collaboration
+
 ```{r}
   Network_authorsCollaboration <- biblioNetwork(
     database,
@@ -72,7 +78,9 @@ summary(database_obj)
     labelsize=0.6
   )
 ```
+
 ### University collaboration
+
 ```{r}
 Network_universityCollaboration <- biblioNetwork(
   database,
@@ -91,7 +99,9 @@ Network_universityCollaboration <- biblioNetwork(
   )
 
 ```
+
 ### Country collaboration
+
 ```{r}
 countries <- metaTagExtraction(database, Field = "AU_CO", sep = ";")
 
@@ -114,6 +124,7 @@ Network_countryCollaboration <- biblioNetwork(
 ```
 
 ### Authors co-citation
+
 ```{r}
 authors_cocitation <- metaTagExtraction(database, Field = "CR_AU", sep = ";")
 
@@ -135,6 +146,7 @@ net <- networkPlot(
 ```
 
 ### Reference co-citation
+
 ```{r}
 ref_cr_au <- metaTagExtraction(
   database,
@@ -159,18 +171,21 @@ net <- networkPlot(
 ```
 
 ## Badford's law
+
 "It estimates and draws the Bradford's law source distribution. Bradford's law is a patterns first described by (Samuel C. Bradford, 1934) that estimates the exponentially diminishing returns of searching for reference jornals. One formulation is that if journals in a field are sorted by number of articles into three groups, each with about one-third of all articles, then the number of journals in each group will be proportional to 1:n:n2." [1]
 
 ```{r}
 BL <- bradford(database)
 
-BL
+BL$graph
 ```
 
 ## Citation frequency distribution
-It calculates frequency distribution of citations. 
 
-- Cited articles
+It calculates frequency distribution of citations.
+
+-   Cited articles
+
 ```{r}
 CFR <- citations(
   database, 
@@ -181,7 +196,9 @@ CFR <- citations(
 CFR$Cited[1:10]
 
 ```
-- Cited first authors
+
+-   Cited first authors
+
 ```{r}
 CFA <- citations(
   database,
@@ -193,6 +210,7 @@ CFA$Cited[1:10]
 ```
 
 ## Co-occurrence matrix
+
 "cocMatrix computes co-occurences between elements of a Tag Field from a bibliographic data frame. Manuscript is the unit of analysis" [1]
 
 ```{r}
@@ -206,6 +224,7 @@ CFA$Cited[1:10]
 ```
 
 ## Creating and plotting conceptual structure map of a scientific field
+
 The function conceptualStructure creates a conceptual structure map of a scientific field performing Correspondence Analysis (CA), Multiple Correspondence Analysis (MCA) or Metric Multidimensional Scaling (MDS) and Clustering of a bipartite network of terms extracted from keyword, title or abstract fields.
 
 ```{r}
@@ -220,8 +239,8 @@ CS <- conceptualStructure(
 ```
 
 ## Coupling Analysis
-"It performs a coupling network analysis and plots community detection results on a bi-dimensional
-map (Coupling Map)"[1]
+
+"It performs a coupling network analysis and plots community detection results on a bi-dimensional map (Coupling Map)"[1]
 
 ```{r}
 mapa <- couplingMap(
@@ -239,7 +258,8 @@ plot(mapa$map)
 ```
 
 ## Authors' dominance ranking
-"It calculates the authors’ dominance ranking from an object of the class ’bibliometrix’ as proposed by Kumar & Kumar, 2008"[1]
+
+"It calculates the authors' dominance ranking from an object of the class 'bibliometrix' as proposed by Kumar & Kumar, 2008"[1]
 
 ```{r}
 DR <- dominance(
@@ -249,8 +269,11 @@ DR <- dominance(
 
 DR
 ```
+
 ## Searching of duplicated records in a bibliographic database
+
 "Used to find duplicated between two or more databases"[1]
+
 ```{r}
 newM <- duplicatedMatching(
   database,
@@ -261,11 +284,13 @@ newM <- duplicatedMatching(
 
 dim(newM)
 ```
+
 ## Field Tag distribution by Year
+
 "It calculates the median year for each item of a field tag."[1]
 
 ```{r}
-timespan=c(1999,2021)
+timespan=c(2016,2021)
 res <- fieldByYear(
   database,
   field = "ID",
@@ -277,6 +302,7 @@ res <- fieldByYear(
 ```
 
 ## Author local citation
+
 "It calculates local citations (LCS) of authors and documents of a bibliographic collection. Local citations meansure how many times an author (or a document) included in this collection have been cited by the documents also included in the collection"[1]
 
 ```{r}
@@ -285,7 +311,9 @@ CR <- localCitations(database, sep = ";")
 CR$Authors[1:10,]
 CR$Papers[1:10,]
 ```
+
 ## Lotka's law coefficient estimation
+
 It estimates Lotka's law coefficients for scientific productivity (Lotka A.J., 1926)
 
 ```{r}
@@ -293,6 +321,7 @@ lotka(database_obj)
 ```
 
 ## Plotting bibliographic networks
+
 The function networkPlot can plot a bibliographic network previously created by biblioNetwork.
 
 ```{r}
@@ -313,6 +342,7 @@ net <- networkPlot(
 ```
 
 ## Calculate similarity indices
+
 "It calculates a relative measure of bibliographic co-occurrences." [1]
 
 ```{r}
@@ -334,6 +364,7 @@ S = normalizeSimilarity(
 ```
 
 ## Plotting bibliometric analysis results
+
 ```{r}
 years=c(2018,2019,2020,2021)
 
@@ -348,6 +379,7 @@ plotThematicEvolution(nexus$Nodes, nexus$Edges)
 ```
 
 ## Reference publication Year Spectroscopy
+
 "rpys computes a Reference Publication Year Spectroscopy for detecting the Historical Roots of Research Fields. The method was introduced by Marx et al., 2014." [1]
 
 ```{r}
@@ -358,8 +390,8 @@ res <- rpys(
 )
 ```
 
-
 ### Number of documents published annually per Top Sources
+
 "It calculates yearly published documents of the top sources." [1]
 
 ```{r}
@@ -375,6 +407,7 @@ ggplot(DF, aes(Year, value, group = variable, color = variable))+geom_line()
 ```
 
 ### Create a thematic map
+
 "thematicMap starts from a co-occurrence keyword network to plot in a two-dimesional map the typological themes of a domain."[1]
 
 ```{r}
@@ -391,7 +424,6 @@ res <- thematicMap(
 plot(res$map)
 ```
 
-
 ```{r}
 threeFieldsPlot(
   database, 
@@ -400,6 +432,6 @@ threeFieldsPlot(
 )
 ```
 
-
 ### References
-[1] Aria, M., Cuccurullo, C., Package ‘bibliometrix’. Available on https://cran.r-project.org/web/packages/bibliometrix/bibliometrix.pdf 
+
+[1] Aria, M., Cuccurullo, C., Package 'bibliometrix'. Available on <https://cran.r-project.org/web/packages/bibliometrix/bibliometrix.pdf>
